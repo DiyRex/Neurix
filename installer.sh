@@ -258,7 +258,7 @@ main() {
       info "Arch:     $ARCH"
       info "Version:  $VERSION"
       info "Host:     $OLLAMA_HOST"
-      [[ -n "$LISTEN_ADDRESS" ]] && info "Listen:   $LISTEN_ADDRESS" || info "Listen:   auto (9101-9160)"
+      if [[ -n "$LISTEN_ADDRESS" ]]; then info "Listen:   $LISTEN_ADDRESS"; else info "Listen:   auto (9101-9160)"; fi
       echo ""
 
       install_binary "$OS" "$ARCH" "$VERSION"
