@@ -1,26 +1,123 @@
 version: 2
 project_name: ollama_exporter
+
+before:
+  hooks:
+    - go mod tidy
+    - go vet ./...
+
 builds:
   - id: ollama_exporter
     main: ./cmd/ollama_exporter/
     binary: ollama_exporter
     env:
       - CGO_ENABLED=0
-    goos: [linux, darwin, windows]
-    goarch: [amd64, arm64]
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
     ldflags:
+      - -s -w
       - -X github.com/prometheus/common/version.Version={{.Version}}
       - -X github.com/prometheus/common/version.Revision={{.Commit}}
       - -X github.com/prometheus/common/version.Branch={{.Branch}}
       - -X github.com/prometheus/common/version.BuildDate={{.Date}}
+      - -X main.Version={{.Version}}
+
 archives:
-  - format: tar.gz
+  - id: default
+    format: tar.gz
     format_overrides:
       - goos: windows
         format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - web.config.yml
+      - deploy/**
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "Merge pull request"
+      - "Merge branch"
+  groups:
+    - title: "New Features"
+      regexp: "^feat"
+      order: 0
+    - title: "Bug Fixes"
+      regexp: "^fix"
+      order: 1
+    - title: "Other"
+      order: 999
+
+release:
+  github:
+    owner: DiyRex
+    name: Neurix
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"
+  footer: |
+    ## Quick Start
+
+    ```bash
+    # Linux amd64
+    tar xzf ollama_exporter_{{ .Version }}_linux_amd64.tar.gz
+    ./ollama_exporter
+    # Auto-selects a free port from 9101–9160 and prints the metrics URL
+    ```
+
+    **Default port range**: 9101–9160 (first available)
+    **Override**: `--web.listen-address=:9400`
+    **TLS / basic auth**: `--web.config.file=web.config.yml`
+
 dockers:
-  - image_templates:
-      - "ghcr.io/diyrex/ollama_exporter:{{.Tag}}-amd64"
+  - id: amd64
+    image_templates:
+      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-amd64"
+      - "ghcr.io/diyrex/ollama_exporter:latest"
+    dockerfile: deploy/docker/Dockerfile
     use: buildx
     build_flag_templates:
-      - --platform=linux/amd64
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.title=ollama_exporter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.revision={{ .Commit }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.source=https://github.com/DiyRex/Neurix"
+
+  - id: arm64
+    image_templates:
+      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-arm64"
+    dockerfile: deploy/docker/Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.title=ollama_exporter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.revision={{ .Commit }}"
+
+docker_manifests:
+  - name_template: "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-amd64"
+      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/diyrex/ollama_exporter:latest"
+    image_templates:
+      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-amd64"
+      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-arm64"
