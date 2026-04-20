@@ -32,10 +32,10 @@ builds:
 
 archives:
   - id: default
-    format: tar.gz
+    formats: [tar.gz]
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - web.config.yml
@@ -86,38 +86,9 @@ release:
     **Override**: `--web.listen-address=:9400`
     **TLS / basic auth**: `--web.config.file=web.config.yml`
 
-dockers:
-  - id: amd64
-    image_templates:
-      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-amd64"
-      - "ghcr.io/diyrex/ollama_exporter:latest"
-    dockerfile: deploy/docker/Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.title=ollama_exporter"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.revision={{ .Commit }}"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.source=https://github.com/DiyRex/Neurix"
+    ## Docker
 
-  - id: arm64
-    image_templates:
-      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-arm64"
-    dockerfile: deploy/docker/Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.title=ollama_exporter"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.revision={{ .Commit }}"
-
-docker_manifests:
-  - name_template: "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}"
-    image_templates:
-      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-amd64"
-      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-arm64"
-  - name_template: "ghcr.io/diyrex/ollama_exporter:latest"
-    image_templates:
-      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-amd64"
-      - "ghcr.io/diyrex/ollama_exporter:{{ .Tag }}-arm64"
+    ```bash
+    docker pull ghcr.io/diyrex/ollama_exporter:{{ .Tag }}
+    docker run -p 9101:9101 ghcr.io/diyrex/ollama_exporter:{{ .Tag }}
+    ```
