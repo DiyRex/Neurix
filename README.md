@@ -1,4 +1,4 @@
-# Ollama Exporter
+# Neurix Ollama NVIDIA GPU & Temperature Stats Exporter
 
 Prometheus metrics exporter for the [Ollama](https://ollama.ai) LLM runtime.
 
