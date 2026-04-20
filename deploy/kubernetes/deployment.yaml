@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-exporter
+  labels:
+    app: ollama-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama-exporter
+  template:
+    metadata:
+      labels:
+        app: ollama-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9400"
+    spec:
+      containers:
+        - name: ollama-exporter
+          image: ghcr.io/diyrex/ollama_exporter:latest
+          args:
+            - --ollama.host=http://ollama-service:11434
+          ports:
+            - containerPort: 9400
+              name: metrics
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-exporter
+spec:
+  selector:
+    app: ollama-exporter
+  ports:
+    - port: 9400
+      targetPort: metrics

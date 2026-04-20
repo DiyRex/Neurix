@@ -1,0 +1,26 @@
+version: 2
+project_name: ollama_exporter
+builds:
+  - id: ollama_exporter
+    main: ./cmd/ollama_exporter/
+    binary: ollama_exporter
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -X github.com/prometheus/common/version.Version={{.Version}}
+      - -X github.com/prometheus/common/version.Revision={{.Commit}}
+      - -X github.com/prometheus/common/version.Branch={{.Branch}}
+      - -X github.com/prometheus/common/version.BuildDate={{.Date}}
+archives:
+  - format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+dockers:
+  - image_templates:
+      - "ghcr.io/diyrex/ollama_exporter:{{.Tag}}-amd64"
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64

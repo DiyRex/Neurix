@@ -1,0 +1,15 @@
+[Unit]
+Description=Prometheus Ollama Exporter
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+ExecStart=/usr/local/bin/ollama_exporter \
+    --ollama.host=http://localhost:11434 \
+    --web.listen-address=:9400
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
