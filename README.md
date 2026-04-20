@@ -23,8 +23,8 @@ Override the port:
 Docker:
 
 ```bash
-docker pull ghcr.io/diyrex/ollama_exporter:latest
-docker run -p 9101:9101 ghcr.io/diyrex/ollama_exporter:latest
+docker pull diyrex5224/ollama_exporter:latest
+docker run -p 9101:9101 diyrex5224/ollama_exporter:latest
 ```
 
 ## Flags
