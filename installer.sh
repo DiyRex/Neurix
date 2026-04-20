@@ -67,22 +67,26 @@ install_binary() {
 
   info "Downloading ${archive} ..."
   tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
 
-  curl -fsSL "$url" -o "${tmpdir}/${archive}" || \
+  curl -fsSL "$url" -o "${tmpdir}/${archive}" || {
+    rm -rf "$tmpdir"
     die "Download failed. Check that release ${version} exists for ${os}/${arch}."
+  }
 
   info "Extracting ..."
   if [[ "$ext" == "tar.gz" ]]; then
     tar -xzf "${tmpdir}/${archive}" -C "$tmpdir"
   else
-    command -v unzip &>/dev/null || die "'unzip' is required for Windows archives."
+    command -v unzip &>/dev/null || { rm -rf "$tmpdir"; die "'unzip' is required for Windows archives."; }
     unzip -q "${tmpdir}/${archive}" -d "$tmpdir"
   fi
 
   local bin_src="${tmpdir}/${BINARY}"
   [[ -f "$bin_src" ]] || bin_src=$(find "$tmpdir" -name "$BINARY" -type f | head -1)
-  [[ -f "$bin_src" ]] || die "Binary not found in archive."
+  if [[ ! -f "$bin_src" ]]; then
+    rm -rf "$tmpdir"
+    die "Binary not found in archive."
+  fi
 
   if [[ "$os" == "linux" || "$os" == "darwin" ]]; then
     if [[ -w "$INSTALL_DIR" ]]; then
@@ -92,12 +96,12 @@ install_binary() {
     fi
     sudo chmod +x "${INSTALL_DIR}/${BINARY}"
   else
-    # Windows — install to current directory
     INSTALL_DIR="."
     mv "$bin_src" "./${BINARY}.exe"
     warn "Windows detected: binary placed in current directory as ${BINARY}.exe"
   fi
 
+  rm -rf "$tmpdir"
   success "Binary installed to ${INSTALL_DIR}/${BINARY}"
 }
 
