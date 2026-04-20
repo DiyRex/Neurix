@@ -38,6 +38,17 @@ docker pull diyrex5224/ollama_exporter:latest
 docker run -p 9101:9101 diyrex5224/ollama_exporter:latest
 ```
 
+## Grafana Dashboard
+
+Import the pre-built dashboard directly in Grafana:
+
+- **Dashboard ID**: `25193`
+- **URL**: https://grafana.com/grafana/dashboards/25193/
+
+Or import the JSON from [`grafana/ollama_dashboard.json`](grafana/ollama_dashboard.json).
+
+Covers all `ollama_*` and `nvidia_smi_*` metrics — models, VRAM, GPU utilization, thermals, power, clocks, ECC errors, and process stats.
+
 ## Flags
 
 | Flag | Default | Env | Description |
