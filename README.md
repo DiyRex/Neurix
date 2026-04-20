@@ -6,12 +6,23 @@ Exports Ollama model inventory, loaded model memory, process stats, and full NVI
 
 ## Quick Start
 
+**One-line install** (Linux & macOS, auto-detects OS and architecture):
+
 ```bash
-# Download a release binary (Linux amd64)
-tar xzf ollama_exporter_<version>_linux_amd64.tar.gz
-./ollama_exporter
-# Auto-selects a free port from 9101–9160 and prints:
-# {"level":"INFO","msg":"Metrics available","url":"http://localhost:9101/metrics"}
+curl -fsSL https://raw.githubusercontent.com/DiyRex/Neurix/main/installer.sh | sudo bash
+```
+
+Custom port or Ollama host:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/DiyRex/Neurix/main/installer.sh | \
+  sudo OLLAMA_HOST=http://localhost:11434 LISTEN_ADDRESS=:9200 bash
+```
+
+Uninstall:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/DiyRex/Neurix/main/installer.sh | sudo bash -s uninstall
 ```
 
 Override the port:
